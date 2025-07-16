@@ -1,0 +1,123 @@
+-----[ tell mudlet that we're a legit mapper ]-----
+mudlet = mudlet or {}
+mudlet.mapper_script = true
+
+-----[ place mapper in selected window ]-----
+local mapper = Geyser.Mapper:new({
+  name = "mapper",
+  x = 0, y = 0, --coordinates
+  width = "100%", height = "100%", --how big it is
+}, FEDGUI.tabright_top.Mapcenter ) --the window the mapper is in
+--not sure the mapper is able to go into this tab? maybe it needs a console put in the tab first?
+
+
+-----[ todo ]-----
+--when triggered by receving gmcp.room information from the mud
+--check if the room already exists by checking the roomhash (which is generated from the room's system, area, and number
+--if the room doesn't exist, create it
+--if the room does exist, and we haven't visited it before (possibly because we just created it), update its info
+--set room name, set room flags, set exits, generate rooms based off exits (and mark those rooms as unvisited)
+
+-----[ everything past this line is experimental ]-----
+
+----- needed variables
+local systemName = gmcp.room.info.system
+local areaName = gmcp.room.info.area
+local roomNum = gmcp.room.info.num
+local roomCoord = 0 --x,y,z coordinates,generated via MATH
+  --X-Column = roomNum % 64
+  --Y-Row = roomNum // 64
+  --Z = 0 --no Z directions allowed
+local roomHash = 0 --smush system.area.num together to get a unique identifier
+local roomName = gmcp.room.info.name
+local roomExits = gmcp.room.info.exits --a list of directions and the room number associated with them
+--like so:    {
+--      in = 524,
+--      n = 524,
+--      nw = 523,
+--      s = 652,
+--      sw = 651,
+--      w = 587
+--    },
+local roomFlags = gmcp.room.info.flags --this is a list of flags, appears in the data as { "space", "orbit" }
+local shuttleExit = gmcp.room.info.board or 0
+  --only appears in rooms with the "shuttlepad" flag
+  --takes the form of System.Area.Num
+  --so "Sol.Sol Space.853"
+  --needs formatting to just pull the area and number out of this
+local orbitLanding = gmcp.room.info.orbit or 0
+  --only appears in rooms with the "orbit" flag
+  --takes the form of System.Area.Num
+  --so "Sol.Selena.587"
+  --needs formatting to pull the area and number out of this
+  
+--step1: determine if the local area we're in is registered
+  --if it is not registered, register it
+--step2: determine if the room we're in already exists (check by the roomHash)
+  --it should exist, but if it doesn't, create it
+--step3: update all the room info - name, flags, exits
+--step4: check all the room exits, create a room for each exit at the coordinates generated from that room number
+  --put a room hash on that room also, because it's guaranteed to be in the same area
+--step5: handle special cases - if the room is flagged as 'orbit' or 'shuttlepad' generate the corresponding room in the area it connects to?
+--step6: set room colors based on the room flags
+
+-----[ update room info ]----
+
+-----[ create area ] -----
+--addAreaName
+
+-----[ create room ]-----
+-- triggered on receiving gmcp.room data
+-- will roomExists have a problem with duplicate room numbers in different areas?
+-- the gotRoomInfo script from the website sets the roomID to a hash based on system, area, and room...
+local function receiveGMCP_room()
+  local roomID = gmcp.room.info.num
+  local areaName = gmcp.room.info.area
+  centerview(roomID) --center the map on the player
+  if roomExists(roomID) then
+    --update exits and other room info like the name
+    return
+  else
+    --create the room
+      --addRoom(gmcp.room.info.num, gmcp.room.info.area)
+    --then update exits and other room info like the name
+      --gmcp.room.info.exits (takes the form of a table: { e = 913, out = 911, w = 911 }
+    --create dummy rooms off the exits
+    --highlight new rooms that we haven't entered yet
+    return
+  end
+
+end
+
+local function roomUpdate()
+  --should this just be the same as generate?
+end
+
+local function roomGenerate()
+  --setRoomName(roomID, newName)
+  --setExit(from roomID, to roomID, direction) --creates one-way exits
+    --need to create the room on the other side of the exit and link it back
+    --also highlight it so it's clear we haven't been inside
+  --setRoomUserData(roomID, key (as a string), value (as a string))
+    --set the room flags here
+    --set visit count?
+  --setRoomEnv(roomID, newEnvID) --base this on the room flags
+  --setRoomChar(roomID, character) --base this on the env
+  --setRoomCoordinates(roomID, x, y, z)
+
+end
+
+  
+-- potential problems - need a way to handle exits that get added or removed
+  -- such as Earth's monorail
+  -- on checking to see if a room already exists, if it does update exits?
+  -- only add exits this way, don't remove them, because of the Mercury shuttle
+  
+--roomExists(roomID)
+
+
+----- known room flags
+--orbit, space, link - the space flag will always appear with one of these three flags, and it's possible for a room to have all three
+--shuttlepad, exchange - it's possible for a room to have one or both of these two flags
+--only rooms with orbit, link, and shuttlepad flags are able to change areas
+--it's baffling that there aren't more flags, because the Fed2WorkBench has checkboxes for many more roomtypes
