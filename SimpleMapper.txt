@@ -1,0 +1,641 @@
+mudlet = mudlet or {}
+mudlet.mapper_script = true
+
+simpleMapper = simpleMapper or {}
+simpleMapper.automerge = true
+simpleMapper.autoexits = false
+simpleMapper.lastRoomMove = simpleMapper.lastRoomMove or {}
+simpleMapper.undoVnum = simpleMapper.undoVnum or {}
+simpleMapper.aliases = simpleMapper.aliases or {}
+simpleMapper.handlers = simpleMapper.handlers or {}
+simpleMapper.help = [[Simple Mapper
+
+Create a simple map using only directional commands.
+Supports n,s,e,w,ne,nw,se,sw,u,d.  This mapper does
+not capture any game data so can also be used offline
+for creating areas.  To get started on a new map issue
+the following command: <yellow>smap new area My Area<reset>
+and starting moving around.
+
+smap help                           -- display this help
+smap new area <name>                -- create a new area with a start room
+smap start                          -- start mapping by following directions
+smap stop                           -- stop mapping
+smap color <color>                  -- color or colour a room
+smap connect [major|minor|all|off]  -- autoconnect adjacent rooms
+                                     - major is n, s, e, w
+                                     - minor is ne, nw, se, sw
+                                     - all is both major and minor
+                                     - default: off
+smap door <direction>               -- create/remove a door given a direction
+                                     - i.e. n, s, e, w, etc
+smap link <vnum> <command>          -- link to a room using a custom command
+                                     - e.g. enter portal, push button, in, out
+smap merge                          -- merge rooms in map displayed on top of each other
+smap merge auto                     -- toggle automatic merging of rooms (default: true)
+smap undo                           -- remove last room created and all exits leading there]]
+  
+shortDir = { ["north"]     = "n",
+             ["south"]     = "s",
+             ["east"]      = "e",
+             ["west"]      = "w",
+             ["northwest"] = "nw",
+             ["northeast"] = "ne",
+             ["southwest"] = "sw",
+             ["southeast"] = "se",
+             ["up"]        = "u",
+             ["down"]      = "d" }
+                          
+local longDir = {  ["n"]  = "north",
+                   ["s"]  = "south",
+                   ["e"]  = "east",
+                   ["w"]  = "west",
+                   ["nw"] = "northwest",
+                   ["ne"] = "northeast",
+                   ["sw"] = "southwest",
+                   ["se"] = "southeast",
+                   ["u"]  = "up",
+                   ["d"]  = "down" }                          
+
+
+local oppositeDir = {  ["n"]  = "s",  
+                       ["s"]  = "n",
+                       ["e"]  = "w",
+                       ["w"]  = "e",
+                       ["u"]  = "d",
+                       ["d"]  = "u",
+                       ["nw"] = "se",
+                       ["ne"] = "sw",
+                       ["sw"] = "ne",
+                       ["se"] = "nw" }                          
+
+local stubmap = {
+    north = 1,      northeast = 2,      northwest = 3,      east = 4,
+    west = 5,       south = 6,          southeast = 7,      southwest = 8,
+    up = 9,         down = 10,          ["in"] = 11,        out = 12,
+    northup = 13,   southdown = 14,     southup = 15,       northdown = 16,
+    eastup = 17,    westdown = 18,      westup = 19,        eastdown = 20,
+    [1] = "north",  [2] = "northeast",  [3] = "northwest",  [4] = "east",
+    [5] = "west",   [6] = "south",      [7] = "southeast",  [8] = "southwest",
+    [9] = "up",     [10] = "down",      [11] = "in",        [12] = "out",
+    [13] = "northup", [14] = "southdown", [15] = "southup", [16] = "northdown",
+    [17] = "eastup", [18] = "westdown", [19] = "westup",    [20] = "eastdown",
+}
+
+--- Basic speedwalking functionality.
+function doSpeedWalk()
+
+  for i = 1, #speedWalkDir do
+
+    if string.starts(speedWalkDir[i], "script:") then
+      local dir = string.gsub(speedWalkDir[i], "script:", "")
+      loadstring(dir)()
+    else
+      simpleMapper.move(longDir[speedWalkDir[i]])
+    end
+    
+  end
+  
+end
+
+
+--- Recolour the current room.
+-- @param colour the new colour for the current room
+function simpleMapper.colour(colour)
+
+  local colours = { "black", "red", "green", "yellow", "blue", "pink", "cyan", "white", "grey" }
+
+  if not colour then
+      simpleMapper.echo("Syntax: smap colour <name>.  Available colours are " .. table.concat(colours, ", ") .. ".")
+      return
+  end  
+  
+  if table.index_of(colours, colour) then
+    setRoomEnv(getPlayerRoom(), 263 + table.index_of(colours, colour))
+    simpleMapper.echo("Setting room colour to " .. colour .. ".")
+  else
+    simpleMapper.echo("Colour not found.  Available colours are " .. table.concat(colours, ", ") .. ".")
+  end
+
+end
+
+
+--- Creates a new area given a name and a starting room.
+-- @param name the name of the new area
+function simpleMapper.createArea(name)
+
+  if not name then
+    simpleMapper.echo("No area name supplied.")
+    simpleMapper.echo("Syntax: smap new area <areaname>")
+    return
+  end
+
+  local areaVnum, err = addAreaName(name)
+  
+  if areaVnum == nil or areaVnum < 1 or err then
+    simpleMapper.echo("That area could not be added:")
+    simpleMapper.echo(err)
+    return
+  else
+  
+    simpleMapper.echo("Created new area and starting room.")
+    simpleMapper.start()
+    
+    -- add a room to the new area
+    local vnum = createRoomID()
+    addRoom(vnum)
+    setRoomArea(vnum, areaVnum)
+    centerview(vnum)
+    -- undo functionality
+    table.insert(simpleMapper.lastRoomMove, vnum)
+  end
+  
+end
+
+
+--- Create a one way door on an exit.
+-- @param dir the direction (in short form) to mark as a setDoor
+function simpleMapper.door(dir)
+
+  local currentVnum = getPlayerRoom()
+  
+  if not roomExists(currentVnum) then
+    simpleMapper.echo("Please choose your current location from the mapper window.")
+    return
+  end
+
+  if not dir then
+    simpleMapper.echo("Syntax: smap door <direction>")
+    simpleMapper.echo("Direction must be one of following: " .. table.concat(table.keys(longDir), ", "))
+    return
+  end
+  
+  local exits = getRoomExits(currentVnum)
+  
+  if not table.contains(exits, longDir[dir]) then
+    simpleMapper.echo("No exit in that direction.")
+    return
+  end
+  
+  local doors = getDoors(currentVnum)
+  
+  if table.contains(doors, dir) then
+    simpleMapper.echo("Removing door to the " .. longDir[dir])
+    setDoor(currentVnum, dir, 0)    
+  else  
+    -- just make a simple closed door
+    local CLOSED_DOOR = 2
+    setDoor(currentVnum, dir, CLOSED_DOOR)
+    simpleMapper.echo("Adding door to the " .. longDir[dir])
+  end
+
+  updateMap()
+
+end
+
+
+
+--- Moves the character around the map, either walking or creating new rooms.
+-- Creates a twoway exit from the previous room when a new room is added.
+-- @param dir the full direction to move e.g. north, southeast, down
+function simpleMapper.move(dir)
+
+  local currentVnum = getPlayerRoom()
+  local x,y,z = getRoomCoordinates(getPlayerRoom())
+  local exits = getRoomExits(currentVnum)
+
+  if not roomExists(currentVnum) then
+    simpleMapper.echo("Please choose your current location from the mapper window.")
+    return
+  end
+
+  -- undo functionality
+  table.insert(simpleMapper.lastRoomMove, currentVnum)
+  
+  -- online mode: actually send the direction command if we are connected to a game
+  local host, post, connected = getConnectionInfo()
+  
+  if connected then
+    send(dir, false)
+  end  
+   
+  -- just a normal move because an exit already exits to another room
+  if exits[dir] then      
+    centerview(exits[dir])
+    return
+  end
+    
+  -- create a new room
+  if simpleMapper.mapping then
+  
+    local vnum = createRoomID()
+    addRoom(vnum)
+    setRoomArea(vnum, getRoomArea(currentVnum))
+    -- undo functionality 
+    table.insert(simpleMapper.undoVnum, vnum)
+    
+    if dir == "north" or dir == "n" then
+      setRoomCoordinates(vnum, x, y + 1, z)
+    elseif dir == "south" or dir == "s" then
+      setRoomCoordinates(vnum, x, y - 1, z)
+    elseif dir == "east" or dir == "e" then
+      setRoomCoordinates(vnum, x + 1, y, z)
+    elseif dir == "west" or dir == "w" then
+      setRoomCoordinates(vnum, x - 1, y, z)
+    elseif dir == "up" or dir == "u" then
+      setRoomCoordinates(vnum, x, y, z + 1)
+    elseif dir == "down" or dir == "d" then
+      setRoomCoordinates(vnum, x, y, z - 1)
+    elseif dir == "northwest" or dir == "nw" then
+      setRoomCoordinates(vnum, x - 1, y + 1, z)
+    elseif dir == "northeast" or dir == "ne" then
+      setRoomCoordinates(vnum, x + 1 , y + 1, z)
+    elseif dir == "southwest" or dir == "sw" then
+      setRoomCoordinates(vnum, x - 1, y - 1, z)
+    elseif dir == "southeast" or dir == "se" then
+      setRoomCoordinates(vnum, x + 1, y - 1, z)  
+    end
+   
+    simpleMapper.createTwoWayExit(currentVnum, vnum, shortDir[dir])
+    centerview(vnum)
+    currentVnum = vnum   
+    
+    local merge = 1
+    
+    if simpleMapper.automerge then
+      merged = simpleMapper.merge()
+    end
+    
+    if merged == 1 then
+      simpleMapper.echo("New room created.")
+    end
+    
+    if simpleMapper.autoexits == "major" or simpleMapper.autoexits == "all" then
+      
+      x,y,z = getRoomCoordinates(getPlayerRoom())
+
+      local pos = {}
+      
+      pos = getRoomsByPosition(getRoomArea(currentVnum), x + 1, y, z)
+            
+      if table.size(pos) > 0 then
+        simpleMapper.createTwoWayExit(currentVnum, pos[0], "e")
+      end
+      
+      pos = getRoomsByPosition(getRoomArea(currentVnum), x - 1, y, z) 
+           
+      if table.size(pos) > 0 then
+        simpleMapper.createTwoWayExit(currentVnum, pos[0], "w")
+      end
+            
+      pos = getRoomsByPosition(getRoomArea(currentVnum), x, y + 1, z)
+
+      if table.size(pos) > 0 then
+        simpleMapper.createTwoWayExit(currentVnum, pos[0], "n")
+      end
+            
+      pos = getRoomsByPosition(getRoomArea(currentVnum), x, y - 1, z)
+      
+      if table.size(pos) > 0 then
+        simpleMapper.createTwoWayExit(currentVnum, pos[0], "s")
+      end      
+
+    end
+    
+    if simpleMapper.autoexits == "minor" or simpleMapper.autoexits == "all" then
+      
+      x,y,z = getRoomCoordinates(getPlayerRoom())
+
+      local pos = {}
+      
+      pos = getRoomsByPosition(getRoomArea(currentVnum), x + 1, y + 1, z)
+            
+      if table.size(pos) > 0 then
+        simpleMapper.createTwoWayExit(currentVnum, pos[0], "ne")
+      end
+      
+      pos = getRoomsByPosition(getRoomArea(currentVnum), x - 1, y + 1, z) 
+           
+      if table.size(pos) > 0 then
+        simpleMapper.createTwoWayExit(currentVnum, pos[0], "nw")
+      end
+            
+      pos = getRoomsByPosition(getRoomArea(currentVnum), x + 1, y - 1, z)
+
+      if table.size(pos) > 0 then
+        simpleMapper.createTwoWayExit(currentVnum, pos[0], "se")
+      end
+            
+      pos = getRoomsByPosition(getRoomArea(currentVnum), x - 1, y - 1, z)
+      
+      if table.size(pos) > 0 then
+        simpleMapper.createTwoWayExit(currentVnum, pos[0], "sw")
+      end      
+
+    end    
+    
+    return vnum
+  end
+
+end
+
+
+--- Creates a twoway exit from one room to another.
+-- @param from the starting room
+-- @param to the destination room
+-- @param the direction we would take to walk from start to destination
+function simpleMapper.createTwoWayExit(from, to, dir)
+  setExit(from, to, dir)
+  setExit(to, from, oppositeDir[dir])
+end
+
+--- Display the help message.
+function simpleMapper.displayHelp()
+
+  local help = string.split(simpleMapper.help, "\n")
+
+  for i = 1, #help do
+    simpleMapper.echo(help[i])
+  end
+  
+end
+
+--- Display mapper commands with a prefix.
+function simpleMapper.echo(args)
+  
+  cecho(string.format("%s - %s\n", "<cyan>[Simple MAP]<reset>", args))
+
+end
+
+
+--- Combine essentially identical rooms with the same coordinates.
+-- Shamelessly copied from generic_mapper.
+function simpleMapper.merge()
+
+  local currentRoom = getPlayerRoom()
+  
+  if not roomExists(currentRoom) then
+    simpleMapper.echo("Please choose your current location from the mapper window.")
+    return -1
+  end    
+  
+  local x, y, z = getRoomCoordinates(currentRoom)
+  local rooms = getRoomsByPosition(getRoomArea(currentRoom), x, y, z)
+  local exits, portals, room, cmd, curportals
+  local room_count = 1
+  
+  for k, v in pairs(rooms) do
+      if v ~= currentRoom then
+        room_count = room_count + 1
+        for k1, v1 in pairs(getRoomExits(v)) do
+          simpleMapper.createTwoWayExit(currentRoom,v1,shortDir[k1])
+        end
+        for k1,v1 in pairs(getDoors(v)) do
+            setDoor(currentRoom,k1,v1)
+        end
+        for k1,v1 in pairs(getSpecialExitsSwap(v)) do
+            addSpecialExit(currentRoom,v1,k1)
+        end
+        portals = getRoomUserData(v,"portals") or ""
+        if portals ~= "" then
+            portals = string.split(portals,",")
+            for k1,v1 in ipairs(portals) do
+                room,cmd = unpack(string.split(v1,":"))
+                addSpecialExit(tonumber(room),currentRoom,cmd)
+                curportals = getRoomUserData(currentRoom,"portals") or ""
+                if not string.find(curportals,room) then
+                    curportals = curportals .. "," .. room .. ":" .. cmd
+                    setRoomUserData(map.currentRoom,"portals",curportals)
+                end
+            end
+        end
+        -- check handling of custom exits here for doors and exits, and reverse exits
+        for i = 13,#stubmap do
+            local door = "door " .. stubmap[i]
+            local tmp = tonumber(getRoomUserData(v,door))
+            if tmp then
+                setRoomUserData(currentRoom,door,tmp)
+            end
+            local exit = "exit " .. stubmap[i]
+            tmp = tonumber(getRoomUserData(v,exit))
+            if tmp then
+                setRoomUserData(currentRoom,exit,tmp)
+                if tonumber(getRoomUserData(tmp, "exit " .. oppositeDirs[stubmap[i]])) == v then
+                    setRoomUserData(tmp, exit, currentRoom)
+                end
+            end
+        end
+        deleteRoom(v)
+      end
+  end
+  if room_count > 1 then
+      simpleMapper.echo(room_count .. " rooms merged", true)
+  end
+  
+  if room_count == 1 and simpleMapper.automerge == false then
+    simpleMapper.echo("No more rooms to merge.")
+  end
+  
+  return room_count
+  
+end
+
+
+--- Creates a one-way from one room to another, that will use the
+--  given command for going through them.
+-- @param dir the vnum to 
+-- @param command the command to get there
+function simpleMapper.specialExit(dir, command)
+  
+  local currentRoom = getPlayerRoom()
+  
+  if not roomExists(currentRoom) then
+    simpleMapper.echo("Please choose your current location from the mapper window.")
+    return
+  end  
+
+  local vnum = tonumber(dir)
+  
+  if vnum then
+    if not roomExists(vnum) then
+      simpleMapper.echo("Unknown destination room.")
+      return
+    else
+      local script = "script: send(\"" .. command .. "\") centerview(" .. dir .. ")"
+      addSpecialExit(currentRoom, vnum, script)
+      
+      -- any opposite directions?
+      
+      simpleMapper.echo("<white>" .. command .. "<reset> now leads to room " .. vnum)
+      return
+    end
+    
+--  else
+--    simpleMapper.echo("room is a direction")
+  end
+  
+  simpleMapper.echo("Unknown error executing command.")
+  simpleMapper.echo("Syntax: smap exit <vnum> <command>")
+  
+end
+
+
+--- Turn on map creation from directional movement.
+function simpleMapper.start()
+
+  simpleMapper.mapping = true
+  simpleMapper.echo("Mapping turned <white>ON<reset>.  Move around to create new rooms.")
+  
+end
+
+--- Turn off map creation from directional movement.
+-- Areas can still be created and rooms recoloured, etc..
+function simpleMapper.stop()
+
+  simpleMapper.mapping = false
+  simpleMapper.echo("Mapping turned off.")
+  
+  -- reset undo
+  simpleMapper.undoVnum = {}
+  simpleMapper.lastRoomMove = {}
+
+end
+
+--- Toggle on or off automatic merging of stacked rooms.
+function simpleMapper.setAutoConnectExits(args)
+  
+  if args == "major" then
+    simpleMapper.autoexits = "major"
+    simpleMapper.echo("Automatic exit creation of <white>major<reset> exits enabled (n,s,e,w).")
+  elseif args == "minor" then 
+    simpleMapper.autoexits = "minor"
+    simpleMapper.echo("Automatic exit creation of <white>minor<reset> exits enabled (ne,nw,se,sw).")
+  elseif args == "all" then
+    simpleMapper.autoexits = "all"
+    simpleMapper.echo("Automatic exit creation of <white>all<reset> exits enabled (n,s,e,w,ne,nw,se,sw).")
+  elseif args == "off" or args == "none" then
+    simpleMapper.autoexits = false
+    simpleMapper.echo("Automatic exit creation of <white>disabled<reset>.")
+  else
+    simpleMapper.echo("Unknown argument.")
+    simpleMapper.echo("Syntax: smap connect [major|minor|all|none|off]")
+  end
+  
+end
+
+--- Toggle on or off automatic merging of stacked rooms.
+function simpleMapper.toggleMerge()
+  
+  if simpleMapper.automerge then
+    simpleMapper.automerge = false
+    simpleMapper.echo("Automatic merging of rooms disabled.")
+  else
+    simpleMapper.automerge = true
+    simpleMapper.echo("Automatic merging of rooms <white>enabled<reset>.")
+  end
+  
+end
+
+--- Delete a room that was accidentally made.
+function simpleMapper.undo()
+
+  if #simpleMapper.undoVnum == 0 then
+    simpleMapper.echo("No rooms to undo.")
+    simpleMapper.lastRoomMove = {}
+    return
+  end
+  
+ 
+  if not roomExists(simpleMapper.undoVnum[#simpleMapper.undoVnum]) then
+    simpleMapper.echo("Can't find room .. " .. simpleMapper.undoVnum[#simpleMapper.undoVnum] .. " to undo, it must be already deleted.")
+    table.remove(simpleMapper.undoVnum, #simpleMapper.undoVnum)
+--    table.remove(simpleMapper.lastRoomMove, #simpleMapper.lastRoomMove)    
+    return
+  end
+  
+  deleteRoom(simpleMapper.undoVnum[#simpleMapper.undoVnum])
+  simpleMapper.echo("Room " .. simpleMapper.undoVnum[#simpleMapper.undoVnum] .. " deleted.")
+  table.remove(simpleMapper.undoVnum, #simpleMapper.undoVnum) -- undo
+
+  -- clean up the move table of deleted rooms
+  local cleanMoves = {}
+  for k, v in pairs(simpleMapper.lastRoomMove) do
+    if roomExists(v) then
+      table.insert(cleanMoves, v)
+    end
+  end
+  
+  simpleMapper.lastRoomMove = table.deepcopy(cleanMoves)
+  
+  centerview(simpleMapper.lastRoomMove[#simpleMapper.lastRoomMove])
+  table.remove(simpleMapper.lastRoomMove, #simpleMapper.lastRoomMove) 
+
+end
+
+
+--- Handle moving between special exits, on and offline
+-- @param event the event will be sysDataSendRequest
+-- @param command the command must match the special exit script
+function simpleMapper.specialExitsHandler(event, command)
+ 
+  local currentRoom = getPlayerRoom()
+  
+  if not currentRoom then return end
+  
+  local exits = getSpecialExits(currentRoom)
+  
+  if not table.is_empty(exits) then 
+
+    for k, v in pairs(exits) do
+      for k1, v1 in pairs(exits[k]) do      
+        local s, e = string.find(k1, command, 1, true)
+        
+        if s and e then
+          centerview(k)
+          return
+        end
+      end
+    end
+  
+  end
+  
+end
+
+
+for _,v in pairs(simpleMapper.handlers) do
+  killAnonymousEventHandler(v) 
+end
+
+simpleMapper.handlers = {}
+
+table.insert(simpleMapper.handlers, registerAnonymousEventHandler("sysDataSendRequest", "simpleMapper.specialExitsHandler"))
+
+
+-- the alias handling for commands and directions
+for _,v in pairs(simpleMapper.aliases) do
+  killAlias(v) 
+end
+
+simpleMapper.aliases = {}
+
+table.insert(simpleMapper.aliases, tempAlias("^smap door(?: (.+))?$", function() simpleMapper.door(matches[2]) end))
+table.insert(simpleMapper.aliases, tempAlias("^smap connect(?: (.+))?$", function() simpleMapper.setAutoConnectExits(matches[2]) end))
+table.insert(simpleMapper.aliases, tempAlias("^smap link(?: (\\d+) (.+))?$", function() simpleMapper.specialExit(matches[2], matches[3]) end))
+table.insert(simpleMapper.aliases, tempAlias("^smap help$", simpleMapper.displayHelp))
+table.insert(simpleMapper.aliases, tempAlias("^smap (color|colour)(?: (.+))?$", function() simpleMapper.colour(matches[3]) end))
+table.insert(simpleMapper.aliases, tempAlias("^smap merge$", simpleMapper.merge))
+table.insert(simpleMapper.aliases, tempAlias("^smap merge auto$", simpleMapper.toggleMerge))
+table.insert(simpleMapper.aliases, tempAlias("^smap new area(?: (.+))?$", function() simpleMapper.createArea(matches[2]) end))
+table.insert(simpleMapper.aliases, tempAlias("^smap start$", simpleMapper.start))
+table.insert(simpleMapper.aliases, tempAlias("^smap stop$", simpleMapper.stop))
+table.insert(simpleMapper.aliases, tempAlias("^smap undo$", simpleMapper.undo))
+table.insert(simpleMapper.aliases, tempAlias("^(n|north)$", function() simpleMapper.move("north") end))
+table.insert(simpleMapper.aliases, tempAlias("^(s|south)$", function() simpleMapper.move("south") end))
+table.insert(simpleMapper.aliases, tempAlias("^(e|east)$", function() simpleMapper.move("east") end))
+table.insert(simpleMapper.aliases, tempAlias("^(w|west)$", function() simpleMapper.move("west") end))
+table.insert(simpleMapper.aliases, tempAlias("^(u|up)$", function() simpleMapper.move("up") end))
+table.insert(simpleMapper.aliases, tempAlias("^(d|down)$", function() simpleMapper.move("down") end))
+table.insert(simpleMapper.aliases, tempAlias("^(nw|northwest)$", function() simpleMapper.move("northwest") end))
+table.insert(simpleMapper.aliases, tempAlias("^(ne|northeast)$", function() simpleMapper.move("northeast") end))
+table.insert(simpleMapper.aliases, tempAlias("^(sw|southwest)$", function() simpleMapper.move("southwest") end))
+table.insert(simpleMapper.aliases, tempAlias("^(se|southeast)$", function() simpleMapper.move("southeast") end))

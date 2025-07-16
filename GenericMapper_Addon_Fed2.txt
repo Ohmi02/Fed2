@@ -1,0 +1,15 @@
+function gotRoomInfo(event, ...)
+  map.prompt.room = gmcp.room.info.name
+  map.prompt.exits = table.concat(table.keys(gmcp.room.info.exits), " ")
+  map.prompt.hash = string.format("%s %s %d",
+    gmcp.room.info.system,
+    gmcp.room.info.area,
+    gmcp.room.info.num
+  )
+  if map.mapping then
+    map.set_area(gmcp.room.info.area)
+  end
+  raiseEvent("onNewRoom")
+end
+
+registerAnonymousEventHandler("gmcp.room.info", "gotRoomInfo")
