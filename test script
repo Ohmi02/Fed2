@@ -14,13 +14,11 @@ local mapper = Geyser.Mapper:new({
   x = 0, y = 0, --coordinates
   width = "100%", height = "100%", --how big it is
 }, FEDGUI.tabright_top.Mapcenter ) --the window the mapper is in
---not sure the mapper is able to go into this tab? maybe it needs a console put in the tab first?
 
 --===begin actual mapping functions===--
 
 -----[ get area ID ]-----
 --this function returns the areaID, adding the area to the mudlet's mapper table if necessary
-
 local function findAreaID(areaname)
 	--areaname is expected to be gmcp.room.info.area
 	local list = getAreaTable() --load mudlet's mapper table
@@ -38,23 +36,27 @@ end
 --rooms are built on a grid that is 64 sqares wide and 63 squares tall
 --we only need to care about how wide the grid is to get the room coordinates
 --calculate their location using the power of MATH
-
 local function makeCoords(roomnum)
 	--roomnum is expected to be gmcp.room.info.num
 	local coordX = roomnum % 64 --modulus to get the column
 --	  local coordY = roomnum // 64 --floor division to get the row
 	local coordY = math.floor(roomnum / 64) --evidently mudlet has no native floor division
 	--there is no Z coord returned because the underlying grid is flat
-	return coordX, coordY
+	return coordX, -coordY
 end
-
+--Y is returned inverted because the game's map puts 0,0 at the top left
+--and mudlet's map puts 0,0 in the center
+--inverting Y syncs everything back up
 
 -----[ create room ]-----
+--generates a room if no room exists, and either way centers the map on the current location
+--this is the function called when we receive gmcp.room data from the game
 function fedmap.makeRoom()
 	local roomHash = gmcp.room.info.system .. "." .. gmcp.room.info.area .. "." .. gmcp.room.info.num
 	local roomID = getRoomIDbyHash(roomHash)
 	local areaID = findAreaID(gmcp.room.info.area)
 	local coordX, coordY = makeCoords(gmcp.room.info.num)
+	--echo(roomHash)
 	
 	if roomID == -1 then -- -1 is returned if no room ID matches the hash
 		roomID = createRoomID()
@@ -63,6 +65,7 @@ function fedmap.makeRoom()
 		setRoomCoordinates(roomID, coordX, coordY, 0)
 		setRoomName(roomID, gmcp.room.info.name)
 	end
+	centerview(roomID)
 end
 
 -----[ environments ]-----
@@ -73,9 +76,10 @@ local room_type = {
 	--prioritize the lowest id when multiple environments overlap
 	["link"] = {id = 1, unpack(color_table.ansiRed)},
 	["orbit"] = {id = 2, unpack(color_table.ansiRed)},
-	["space"] = {id = 3, unpack(color_table.ansiWhite)},
+	["space"] = {id = 3, unpack(color_table.ansiWhite)}, --this is an 'empty' room so it is a boring color
 	["shuttlepad"] = {id = 4, unpack(color_table.ansiRed)},
-	["exchange"] = {id = 5, unpack(color_table.ansiRed)}
+	["exchange"] = {id = 5, unpack(color_table.ansiRed)},
+	["null"] = {id = 99, unpack(color_table.ansiWhite)} --this is an 'empty' room so is a boring color
 	--'red' r128 g0 b0
 	--'green' r0 g128 b0
 	--'yellow' r128 g128 b0
