@@ -1,6 +1,6 @@
 --make sure your ExchangeTriggers folder has the following start of line filter set:
 --+++
---set the following perl regex in the echoExchange_Buy trigger:
+--set the following perl regex in the echoExchange_Sell trigger:
 --^\+{3} Offer price is (\d+)(.+) for first (\d+) tons \+{3}$
 -----[ lua code ]-----
 --puts the selling price (matches[2]) into exchange window
