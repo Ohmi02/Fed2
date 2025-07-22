@@ -39,17 +39,29 @@ FEDGUI.top = FEDGUI.top or Adjustable.Container:new({
   --adjLabelstyle = "border: 1px solid white;",
 })
 
------[ Create label for Top Window ]-----
-FEDGUI.toplabel = FEDGUI.toplabel or Geyser.Label:new(
-  {
-    name = "FEDGUI.toplabel",
-    x = 0,
-    y = 0,
-    width = "100%",
-    height = "100%",
-  },
-  FEDGUI.top
-)
+-----[ Create HBox for Top Window and Populate It ]-----
+-- labels placed inside the HBOX will automatically adjust to fit evenly
+FEDGUI.header = FEDGUI.header or Geyser.HBox:new({
+  name = "FEDGUI.header",
+  x = 0, y = 0,
+  width = "100%",
+  height = "100%",
+},FEDGUI.top)
+
+--seven labels needed
+--Rank Label, Cargo Space, Fuel
+--Stamina, Money, Slithies
+for i=1,6 do
+  FEDGUI["Label"..i] = Geyser.Label:new({
+    name = "FEDGUI.label"..i,
+    adjLabelstyle = "border: 1px solid white;",
+  },FEDGUI.header)
+end
+
+--FEDGUI.label01:echo("Label 01", "black", "c")
+--FEDGUI.label01:setColor(255, 0, 0)
+--FEDGUI.label01:setFontSize(12)
+
 
 -----[ Attach and Connect Borders of Adjustable Containers ]-----
 FEDGUI.left:attachToBorder("left")
