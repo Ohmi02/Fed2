@@ -1,0 +1,7 @@
+--for this to function, create a new script named echoCom
+--add the user event 'gmcp.comm.tell'
+--this script will fire when mudlet receives a gmcp.comm.tell event
+function echoTell()
+  FEDGUI.chatwindow:echo("\n")
+  FEDGUI.chatwindow:cecho('<ansiRed>' .. gmcp.comm.tell.from .. ' tight beams you: "' .. gmcp.comm.tell.message .. '"')
+end
