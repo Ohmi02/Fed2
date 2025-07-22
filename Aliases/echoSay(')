@@ -1,0 +1,5 @@
+--pattern:
+--^'(.+)?$
+send(matches[1])
+FEDGUI.chatwindow:echo("\n")
+FEDGUI.chatwindow:cecho('<ansiCyan>You say, "' .. matches[2] .. '"')
