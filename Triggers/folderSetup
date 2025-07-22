@@ -1,0 +1,3 @@
+--create a ExchangeTriggers folder to place all of the echoExchange triggers into
+--put the following start of line filter on the folder:
+--+++
