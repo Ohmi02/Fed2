@@ -1,0 +1,5 @@
+--pattern:
+--^com (.+)?$
+send(matches[1])
+FEDGUI.chatwindow:echo("\n")
+FEDGUI.chatwindow:cecho('<ansiCyan>You comm: "' .. matches[2] .. '"')
