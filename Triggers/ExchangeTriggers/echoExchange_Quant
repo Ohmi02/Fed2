@@ -1,0 +1,8 @@
+--make sure your ExchangeTriggers folder has the following start of line filter set:
+--+++
+--set the following perl regex in the echoExchange_Quant trigger:
+--^\+{3} Exchange has (.+) for sale \+{3}$
+-----[ lua code ]-----
+--puts the amount available into exchange window
+FEDGUI.exchangewindow:cecho('<ansiYellow>Available: ' .. matches[2] ..'\n')
+deleteLine()
