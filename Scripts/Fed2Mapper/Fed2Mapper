@@ -15,6 +15,45 @@ local mapper = Geyser.Mapper:new({
   width = "100%", height = "100%", --how big it is
 }, FEDGUI.tabright_top.Mapcenter ) --the window the mapper is in
 
+
+--===begin bonus mapping functions===--
+
+-----[ set room environment ]-----
+--set the room color and symbol based on the room's flags
+--colors are the mapper defaults, found from getCustomEnvColorTable()
+--if the 'link', 'orbit', 'shuttlepad', or 'exchange' flags are found, room is maroon
+--having just the 'space' flag or no flags at all results in the room being grey
+--rooms with the 'shuttlepad' flag get a star symbol so they're easy to find
+--rooms with the 'exchange' flag get 'EX' as a symbol so they're easy to find
+--not setting symbols on 'link' or 'orbit' flags because there's too much variety here to hardcode something
+	--end users should set their own symbols through the mapper window
+local function roomColor(roomID)
+	--roomID is expected to be generated via getRoomIDbyHash
+	local flags = gmcp.room.info.flags
+--currently this doesn't work, the ifcheck just returns the final 'other/no flag' result
+	if flags == "link" then --this room lets people jump to different systems
+		echo("link flag found")
+		setRoomEnv(roomID, 257)
+	elseif flags == "orbit" then --this room lets people board their shuttle to land on the planet
+		echo("orbit flag found")
+		setRoomEnv(roomID, 257)
+	elseif flags == "space" then --this is an ordinary space room with no orbits or system links
+		echo("space flag found")
+		setRoomEnv(roomID, 263)
+	elseif flags == "shuttlepad" then --this room lets people board their shuttle to reach their spaceship
+		echo("shuttlepad flag found")
+		setRoomEnv(roomID, 257)
+		setRoomChar(roomID, "★")
+	elseif flags == "exchange" then --this room lets people use the exchange features
+		echo("exchange flag found")
+		setRoomEnv(roomID, 257)
+		setRoomChar(roomID, "EX")
+	else --this is an ordinary room on a planet
+		echo("other/no flag found")
+		setRoomEnv(roomID, 263)
+	end
+end
+
 --===begin actual mapping functions===--
 
 -----[ get area ID ]-----
@@ -64,27 +103,7 @@ function fedmap.makeRoom()
 		addRoom(roomID, areaID)
 		setRoomCoordinates(roomID, coordX, coordY, 0)
 		setRoomName(roomID, gmcp.room.info.name)
+		roomColor(roomID)
 	end
 	centerview(roomID)
 end
-
------[ environments ]-----
-local room_type = {
-	--used to make rooms different colors based on their flags / flag combinations
-	--'space' can appear by itself, 'orbit' and 'link' will always appear with 'space' and can appear with each other
-	--'shuttlepad' and 'exchange' might appear together but usually wont
-	--prioritize the lowest id when multiple environments overlap
-	["link"] = {id = 1, unpack(color_table.ansiRed)},
-	["orbit"] = {id = 2, unpack(color_table.ansiRed)},
-	["space"] = {id = 3, unpack(color_table.ansiWhite)}, --this is an 'empty' room so it is a boring color
-	["shuttlepad"] = {id = 4, unpack(color_table.ansiRed)},
-	["exchange"] = {id = 5, unpack(color_table.ansiRed)},
-	["null"] = {id = 99, unpack(color_table.ansiWhite)} --this is an 'empty' room so is a boring color
-	--'red' r128 g0 b0
-	--'green' r0 g128 b0
-	--'yellow' r128 g128 b0
-	--'blue' r0 g0 b128
-	--'magenta' r128 g0 b128
-	--'cyan' r0 g128 b128
-	--'white' r128 g128 b128
-}
