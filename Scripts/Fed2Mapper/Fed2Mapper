@@ -93,12 +93,12 @@ end
 --this is the function called when we receive gmcp.room data from the game
 function fedmap.makeRoom()
 	local roomHash = gmcp.room.info.system .. "." .. gmcp.room.info.area .. "." .. gmcp.room.info.num
-	local roomID = getRoomIDbyHash(roomHash)
+	local roomID = getRoomIDbyHash(roomHash) --this will be -1 if no room ID matches the hash
 	local areaID = findAreaID(gmcp.room.info.area)
 	local coordX, coordY = makeCoords(gmcp.room.info.num)
 	--echo(roomHash)
 	
-	if roomID == -1 then -- -1 is returned if no room ID matches the hash
+	if roomID == -1 then --no room yet exists with this roomHash
 		roomID = createRoomID()
 		setRoomIDbyHash(roomID, roomHash)
 		addRoom(roomID, areaID)
