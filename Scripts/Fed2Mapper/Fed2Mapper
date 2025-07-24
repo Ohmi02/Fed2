@@ -38,7 +38,7 @@ local function roomColor(roomID)
   	end
   	if flags["link"] then --this room lets people jump to different systems
   		setRoomEnv(roomID, 257)
-  	elseif flags["orbit"] then --this is an ordinary space room with no orbits or system links
+  	elseif flags["orbit"] then --this room lets people board their shuttle to land on the planet
   		setRoomEnv(roomID, 257)
   	elseif flags["space"] then --this is an ordinary space room with no orbits or system links
   		setRoomEnv(roomID, 263)
