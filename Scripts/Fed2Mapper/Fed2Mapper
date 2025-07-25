@@ -16,7 +16,7 @@ local mapper = Geyser.Mapper:new({
 }, FEDGUI.tabright_top.Mapcenter ) --the window the mapper is in
 
 
---===begin bonus mapping functions===--
+--===begin useful mapping functions===--
 
 -----[ set room environment ]-----
 --set the room color and symbol based on the room's flags
@@ -26,36 +26,40 @@ local mapper = Geyser.Mapper:new({
 --rooms with the 'shuttlepad' flag get a star symbol so they're easy to find
 --rooms with the 'exchange' flag get 'EX' as a symbol so they're easy to find
 --not setting symbols on 'link' or 'orbit' flags because there's too much variety here to hardcode something
-	--end users should set their own symbols through the mapper window
+	--end users should be setng their own symbols through the mapper window
 local function roomColor(roomID)
   local table = gmcp.room.info.flags
   if next(table) == nil then --the room's table of flags is empty
   	setRoomEnv(roomID, 263)
   else
-  	local flags = {}
-  	for key,value in ipairs(table) do --take the values from the room's table of flags
-  		flags[value] = true		      --put them into a new table that's easier to search
-  	end
-  	if flags["link"] then --this room lets people jump to different systems
-  		setRoomEnv(roomID, 257)
-  	elseif flags["orbit"] then --this room lets people board their shuttle to land on the planet
-  		setRoomEnv(roomID, 257)
-  	elseif flags["space"] then --this is an ordinary space room with no orbits or system links
-  		setRoomEnv(roomID, 263)
-  	elseif flags["shuttlepad"] then --this room lets people board their shuttle to reach their spaceship
-  		setRoomEnv(roomID, 257)
-  		setRoomChar(roomID, "★")
-  	elseif flags["exchange"] then --this room lets people use the exchange features
-  		setRoomEnv(roomID, 257)
-  		setRoomChar(roomID, "EX")
-  	else --this is an ordinary room on a planet
-  		echo("other flag found")
-  		setRoomEnv(roomID, 263)
-  	end
+  	for key,value in ipairs(table) do 		--take the values from the room's table of flags
+		setRoomUserData(roomID, value, "true")	--put them into the room's user data
+	end
+	if getRoomUserData(roomID, "link") == "true" then --this room lets people jump to different systems
+		--echo("link flag found")
+		setRoomEnv(roomID, 257)
+	elseif getRoomUserData(roomID, "orbit") == "true" then --this room lets people board their shuttle to land on the planet
+		--echo("orbit flag found")
+		setRoomEnv(roomID, 257)
+	elseif getRoomUserData(roomID, "space") == "true" then --this is an ordinary space room with no orbits or system links
+		--echo("space flag found")
+		setRoomEnv(roomID, 272)
+	elseif getRoomUserData(roomID, "shuttlepad") == "true" then --this room lets people board their shuttle to reach their spaceship
+		--echo("shuttlepad flag found")
+		setRoomEnv(roomID, 257)
+		setRoomChar(roomID, "★")
+	elseif getRoomUserData(roomID, "exchange") == "true" then --this room lets people use the exchange features
+		--echo("exchange flag found")
+		setRoomEnv(roomID, 257)
+		setRoomChar(roomID, "EX")
+	else 					--we have no idea what this room is, panic
+		--echo("other flag found")
+		setRoomEnv(roomID, 259)
+	end
   end
 end
 
---===begin actual mapping functions===--
+--===begin core mapping functions===--
 
 -----[ get area ID ]-----
 --this function returns the areaID, adding the area to the mudlet's mapper table if necessary
@@ -79,7 +83,7 @@ end
 local function makeCoords(roomnum)
 	--roomnum is expected to be gmcp.room.info.num
 	local coordX = roomnum % 64 --modulus to get the column
---	  local coordY = roomnum // 64 --floor division to get the row
+	--local coordY = roomnum // 64 --floor division to get the row
 	local coordY = math.floor(roomnum / 64) --evidently mudlet has no native floor division
 	--there is no Z coord returned because the underlying grid is flat
 	return coordX, -coordY
