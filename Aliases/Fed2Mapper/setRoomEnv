@@ -1,0 +1,25 @@
+--set pattern to:
+--^fedmap color (.+$)
+
+local mapperColorTable = {
+  ["red"] = 257, ["green"] = 258, ["yellow"] = 259, ["blue"] = 260, ["magenta"] = 261, ["cyan"] = 262,
+  ["bright grey"] = 263, ["bright gray"] = 263, ["black"] = 264,
+  ["bright red"] = 265, ["bright green"] = 266, ["bright yellow"] = 267, ["bright blue"] = 268,
+  ["bright magenta"] = 269, ["bright cyan"] = 270, ["white"] = 271, ["grey"] = 272, ["gray"] = 272
+}
+
+local roomID = getPlayerRoom()
+
+if type(tonumber(matches[2])) == "number" then
+  setRoomEnv(roomID, matches[2])
+  echo("done\n")
+elseif type(mapperColorTable[matches[2]]) == "number" then
+  setRoomEnv(roomID, mapperColorTable[matches[2]])
+  echo("set color " .. matches[2] .. " #" .. mapperColorTable[matches[2]] .. "\n")
+else
+  echo("Pick one of the following colors:\n")
+  echo("red, green, yellow, blue, magenta, cyan,\n")
+  echo("white, black, grey, bright grey,\n")
+  echo("bright red, bright green, bright yellow,\n")
+  echo("bright blue, bright magenta, bright cyan.\n")
+end
