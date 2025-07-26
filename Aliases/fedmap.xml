@@ -15,7 +15,7 @@ setRoomChar(roomID, matches[2])
 echo("symbol set\n")</script>
 				<command></command>
 				<packageName></packageName>
-				<regex>^fedmap symbol (\w+)</regex>
+				<regex>^fedmap symbol (.+)</regex>
 			</Alias>
 			<Alias isActive="yes" isFolder="no">
 				<name>clearRoomChar</name>
