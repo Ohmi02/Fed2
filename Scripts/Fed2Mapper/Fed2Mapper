@@ -41,7 +41,7 @@ setCustomEnvColor(33, 255, 192, 203, 255) --mudlet's 'pink', used for auto-gener
 --rooms with the 'exchange' flag get 'EX' as a symbol so they're easy to find
 --not setting symbols on 'link' or 'orbit' flags because there's too much variety here to hardcode something
 	--end users should be setting their own symbols through the mapper window
-local function roomColor(roomID)
+function fedmap.roomColor(roomID)
   local table = gmcp.room.info.flags
   if next(table) == nil then --the room's table of flags is empty, this is an ordinary room on a planet
   	setRoomEnv(roomID, 272)
@@ -96,7 +96,7 @@ end
 --convert each fed room number into a a room hash, check to see if there's a mapper room number associated
 --if there is no room already existing with that hash, create one via makeGhostRoom
 --once we are assured the room exists, hook an exit to it
-local function generateExits(areaID, roomID) --called as part of fedmap.makeRoom
+function fedmap.generateExits(areaID, roomID) --called as part of fedmap.makeRoom
 	local exits = gmcp.room.info.exits
 	for dir, number in pairs(exits) do
 		local destinationHash = gmcp.room.info.system .. "." .. gmcp.room.info.area .. "." .. number
@@ -157,13 +157,13 @@ function fedmap.makeRoom()
 		addRoom(roomID, areaID) --create the room using our generated room number
 		setRoomCoordinates(roomID, coordX, coordY, 0) --place the room on the map
 		setRoomName(roomID, gmcp.room.info.name)
-    roomColor(roomID)
-    generateExits(areaID, roomID)
+    fedmap.roomColor(roomID)
+    fedmap.generateExits(areaID, roomID)
   elseif getRoomName(roomID) == "" then --room exists but hasn't had its info set
 		--this existing room already has an ID, hash, and coordinates
 		setRoomName(roomID, gmcp.room.info.name)
-		roomColor(roomID)
-		generateExits(areaID, roomID)
+		fedmap.roomColor(roomID)
+		fedmap.generateExits(areaID, roomID)
 	end
   centerview(roomID)
 end
