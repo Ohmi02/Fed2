@@ -1,0 +1,13 @@
+--set pattern to:
+--^fedmap grid (\w+)
+
+local areaID = getRoomArea(getPlayerRoom())
+if matches[2] == "on" then
+  setGridMode(areaID, true)
+  echo("map mode set to grid\n")
+elseif matches[2] == "off" then
+  setGridMode(areaID, false)
+  echo("map mode set to default\n")
+else
+  echo("grid mode must be set to 'on' or off'\n")
+end
