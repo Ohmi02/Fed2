@@ -1,0 +1,10 @@
+--set pattern to:
+--^fedmap reset room
+
+local roomID = getPlayerRoom()
+setRoomName(roomID, gmcp.room.info.name) --native mapper function to set the name
+fedmap.roomColor(roomID) --resets color & symbols
+local coordX, coordY = fedmap.makeCoords(gmcp.room.info.num) --get room's default location
+setRoomCoordinates(roomID, coordX, coordY, 0) --move room to default position
+centerview(roomID) --centers the map in case the room moved
+echo("room reset to defaults\n")
