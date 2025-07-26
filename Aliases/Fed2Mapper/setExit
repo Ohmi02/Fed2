@@ -1,0 +1,40 @@
+--set pattern to:
+--^fedmap exit (\w+) (\d+)
+
+local convertExit = {
+  ["n"] = "north", ["ne"] = "northeast", ["e"] = "east", ["se"] = "southeast",
+  ["s"] = "south", ["sw"] = "southwest", ["w"] = "west", ["nw"] = "northwest",
+  ["i"] = "in", ["o"] = "out", ["u"] = "up", ["d"] = "down"
+}
+local exitmap = {
+  ["north"] = true, ["northeast"] = true, ["east"] = true, ["southeast"] = true,
+  ["south"] = true, ["southwest"] = true, ["west"] = true, ["northwest"] = true,
+  ["in"] = true, ["out"] = true, ["up"] = true, ["down"] = true
+} --the only valid direction names we accept
+--the setExit function also takes short direction names or exit numbers
+--but since the roomExits table only returns long direction names
+--we need to convert the short names to long ones anyway
+
+local roomID = getPlayerRoom()
+local roomExits = getRoomExits(roomID)
+local dir = matches[2]
+
+if convertExit[dir] ~= nil then --input is in the conversion table
+  dir = convertExit[matches[2]] --go and convert it
+end
+
+if exitmap[dir] then --we've got a valid direction input
+  if roomExits[dir] == tonumber(matches[3]) then --there is an exit to that room in that direction already
+    setExit(roomID, -1, dir) --remove the exit
+    echo(dir.." exit to "..matches[3].." removed\n")
+	elseif roomExits[dir] ~= nil then --there's an exit in that direction, donno where it goes
+		setExit(roomID, -1, dir) --remove the exit
+		setExit(roomID, matches[3], dir) --replace it with the requested exit
+    echo(dir.." exit to "..matches[3].." replaced\n")
+	else
+		setExit(roomID, matches[3], dir) --add the requested exit
+    echo(dir.." exit to "..matches[3].." added\n")
+	end
+else
+  echo("please enter a valid direction\n")
+end
