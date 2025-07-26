@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MudletPackage>
+<MudletPackage version="1.001">
+	<ScriptPackage>
+		<ScriptGroup isActive="yes" isFolder="yes">
+			<name>GUI</name>
+			<packageName></packageName>
+			<script>FEDGUI = FEDGUI or {}
+</script>
+			<eventHandlerList />
+			<Script isActive="yes" isFolder="no">
+				<name>Frame</name>
+				<packageName></packageName>
+				<script>-----[ Spawn the Adjustable Containers ]-----
+FEDGUI.right_top = FEDGUI.right_top or Adjustable.Container:new({
+    name = "FEDGUI.right_top",
+    x = "-20%",
+    y = "0%",
+    height = "50%",
+    width = "20%",
+    locked = true,
+    adjLabelstyle = "border: 1px solid white;",
+})
+
+FEDGUI.right_bottom = FEDGUI.right_bottom or Adjustable.Container:new({
+    name = "FEDGUI.right_bottom",
+    x = "-20%",
+    y = "50%",
+    height = "50%",
+    width = "20%",
+    locked = true,
+    adjLabelstyle = "border: 1px solid white;",
+})
+
+FEDGUI.left = FEDGUI.left or Adjustable.Container:new({
+    name = "FEDGUI.left",
+    x = "0%",
+    y = "0%",
+    height = "100%",
+    width = "15%",
+    locked = true,
+    adjLabelstyle = "border: 1px solid white;",
+})
+
+FEDGUI.top = FEDGUI.top or Adjustable.Container:new({
+  name = "FEDGUI.top",
+  x = "15%",
+  y = "0%",
+  height = "5%",
+  width = "65%",
+  locked = true,
+  --adjLabelstyle = "border: 1px solid white;",
+})
+
+-----[ Create HBox for Top Window and Populate It ]-----
+-- labels placed inside the HBOX will automatically adjust to fit evenly
+FEDGUI.header = FEDGUI.header or Geyser.HBox:new({
+  name = "FEDGUI.header",
+  x = 0, y = 0,
+  width = "100%",
+  height = "100%",
+},FEDGUI.top)
+
+--seven labels needed
+--Rank Label, Cargo Space, Fuel
+--Stamina, Money, Slithies
+for i=1,6 do
+  FEDGUI["Label"..i] = Geyser.Label:new({
+    name = "FEDGUI.label"..i,
+    adjLabelstyle = "border: 1px solid white;",
+  },FEDGUI.header)
+end
+
+--FEDGUI.label01:echo("Label 01", "black", "c")
+--FEDGUI.label01:setColor(255, 0, 0)
+--FEDGUI.label01:setFontSize(12)
+
+-----[ Attach and Connect Borders of Adjustable Containers ]-----
+FEDGUI.left:attachToBorder("left")
+FEDGUI.right_top:attachToBorder("right")
+FEDGUI.right_bottom:attachToBorder("right")
+FEDGUI.top:attachToBorder("top")
+
+FEDGUI.left:connectToBorder("left")
+FEDGUI.right_top:connectToBorder("right")
+FEDGUI.right_bottom:connectToBorder("right")
+FEDGUI.top:connectToBorder("left")
+FEDGUI.top:connectToBorder("right")
+
+FEDGUI.left:changeMenuStyle("dark")
+FEDGUI.right_top:changeMenuStyle("dark")
+FEDGUI.right_bottom:changeMenuStyle("dark")
+FEDGUI.top:changeMenuStyle("dark")</script>
+				<eventHandlerList />
+			</Script>
+			<Script isActive="yes" isFolder="no">
+				<name>TabWindows</name>
+				<packageName></packageName>
+				<script>-----[ Generate Tab Windows ]-----
+FEDGUI.tabright_top = FEDGUI.tabright_top or Adjustable.TabWindow:new(
+  {
+    name = "FEDGUI.tabright_top",
+    x = 0,
+    y = 0,
+    width = "100%",
+    height = "100%",
+    tabBarHeight ="10%",
+    tabs = {"Map"},
+    color1 = "DimGrey",
+    color2 = "Black",
+  },
+  FEDGUI.right_top
+)
+
+FEDGUI.tabright_bottom = FEDGUI.tabright_bottom or Adjustable.TabWindow:new(
+  {
+    name = "FEDGUI.tabright_bottom",
+    x = 0,
+    y = 0,
+    width = "100%",
+    height = "100%",
+    tabBarHeight ="10%",
+    tabs = {"Comm","Vitals"},
+    color1 = "DimGrey",
+    color2 = "Black",
+  },
+  FEDGUI.right_bottom
+)
+
+FEDGUI.tableft = FEDGUI.tableft or Adjustable.TabWindow:new(
+  {
+    name = "FEDGUI.tableft",
+    x = 0,
+    y = 0,
+    width = "100%",
+    height = "100%",
+    tabBarHeight ="5%",
+    tabs = {"Exchange"},
+    color1 = "DimGrey",
+    color2 = "Black",
+  },
+  FEDGUI.left
+)
+
+-----[ Populate Tab Windows ]-----
+mapper = my_mapper or Geyser.Mapper:new(
+  {
+    x = 0, y = 0,
+    width = "100%",
+    height = "100%",
+    name="mapper"
+  },
+  FEDGUI.tabright_top.Mapcenter
+)
+
+FEDGUI.chatwindow = FEDGUI.chatwindow or Geyser.MiniConsole:new({
+  name="FEDGUI.chatwindow",
+  x=0, y=0,
+  autoWrap = true,
+  color = "black",
+  scrollBar = false,
+  fontSize = 14,
+  width="100%", height="100%",
+},FEDGUI.tabright_bottom.Commcenter )
+
+FEDGUI.exchangewindow = FEDGUI.exchangewindow or Geyser.MiniConsole:new({
+  name="FEDGUI.exchangewindow",
+  x=0, y=0,
+  autoWrap = true,
+  color = "black",
+  scrollBar = false,
+  fontSize = 14,
+  width="100%", height="100%",
+},FEDGUI.tableft.Exchangecenter )
+
+-----[ Load Saved Tab Settings ]-----
+--FEDGUI.tabwindow:load()</script>
+				<eventHandlerList />
+			</Script>
+			<Script isActive="yes" isFolder="no">
+				<name>SaveTabsOnExit</name>
+				<packageName></packageName>
+				<script>function SaveTabsOnExit()
+  FEDGUI.tabwindow:save()
+end</script>
+				<eventHandlerList>
+					<string>sysExitEvent</string>
+				</eventHandlerList>
+			</Script>
+			<ScriptGroup isActive="yes" isFolder="yes">
+				<name>StatDisplay</name>
+				<packageName></packageName>
+				<script></script>
+				<eventHandlerList />
+				<Script isActive="yes" isFolder="no">
+					<name>printStats</name>
+					<packageName></packageName>
+					<script>if magicCashNumbers == nil then
+  magicCashNumbers = {
+    ["Groundhog"] = 250000,
+    ["Commander"] = 250000,
+    ["Captain"] = 400000,
+    ["Adventurer"] = 600000,
+    ["Merchant"] = 7500000,
+    ["Trader"] = 12500000,
+    ["Industrialist"] = 17500000,
+    ["Manufacturer"] = 22500000,
+    ["Financier"] = 27500000,
+    ["Founder"] = 27500000,
+    ["Engineer"] = 27500000,
+    ["Mogul"] = 27500000,
+    ["Technocrat"] = 27500000,
+    ["Gengineer"] = 27500000,
+    ["Magnate"] = 27500000,
+    ["Plutocrat"] = 27500000,
+  }
+end
+
+--Rank Label, Cargo Space, Fuel
+--Stamina, Money, Slithies
+
+function printStats()
+  FEDGUI.label1:echo("Rank: "..gmcp.char.vitals.rank)
+  FEDGUI.label2:echo("Hold: "..gmcp.char.ship.hold.cur.."/"..gmcp.char.ship.hold.max)
+  FEDGUI.label3:echo("Fuel: "..gmcp.char.ship.fuel.cur.."/"..gmcp.char.ship.fuel.max)
+  FEDGUI.label4:echo("Stamina: "..gmcp.char.vitals.stamina.cur.."/"..gmcp.char.vitals.stamina.max)
+  FEDGUI.label5:echo("Groats: "..gmcp.char.vitals.cash.."/"..magicCashNumbers[gmcp.char.vitals.rank])
+  FEDGUI.label6:echo("Slithies: "..gmcp.char.vitals.slithies)
+end</script>
+					<eventHandlerList>
+						<string>gmcp.char</string>
+					</eventHandlerList>
+				</Script>
+			</ScriptGroup>
+		</ScriptGroup>
+	</ScriptPackage>
+</MudletPackage>
