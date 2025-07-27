@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MudletPackage>
+<MudletPackage version="1.001">
+	<ScriptPackage>
+		<Script isActive="yes" isFolder="no">
+			<name>TabWindows</name>
+			<packageName></packageName>
+			<script>-----[ Generate Tab Windows ]-----
+FEDGUI.tabright_top = FEDGUI.tabright_top or Adjustable.TabWindow:new(
+  {
+    name = "FEDGUI.tabright_top",
+    x = 0,
+    y = 0,
+    width = "100%",
+    height = "100%",
+    tabBarHeight ="10%",
+    tabs = {"Map"},
+    color1 = "DimGrey",
+    color2 = "Black",
+  },
+  FEDGUI.right_top
+)
+
+FEDGUI.tabright_bottom = FEDGUI.tabright_bottom or Adjustable.TabWindow:new(
+  {
+    name = "FEDGUI.tabright_bottom",
+    x = 0,
+    y = 0,
+    width = "100%",
+    height = "100%",
+    tabBarHeight ="10%",
+    tabs = {"Comm","Cargo"},
+    color1 = "DimGrey",
+    color2 = "Black",
+  },
+  FEDGUI.right_bottom
+)
+
+FEDGUI.tableft = FEDGUI.tableft or Adjustable.TabWindow:new(
+  {
+    name = "FEDGUI.tableft",
+    x = 0,
+    y = 0,
+    width = "100%",
+    height = "100%",
+    tabBarHeight ="5%",
+    tabs = {"Exchange"},
+    color1 = "DimGrey",
+    color2 = "Black",
+  },
+  FEDGUI.left
+)
+
+-----[ Populate Tab Windows ]-----
+mapper = my_mapper or Geyser.Mapper:new(
+  {
+    x = 0, y = 0,
+    width = "100%",
+    height = "100%",
+    name="mapper"
+  },
+  FEDGUI.tabright_top.Mapcenter
+)
+
+FEDGUI.chatwindow = FEDGUI.chatwindow or Geyser.MiniConsole:new({
+  name="FEDGUI.chatwindow",
+  x=0, y=0,
+  autoWrap = true,
+  color = "black",
+  scrollBar = false,
+  fontSize = 14,
+  width="100%", height="100%",
+},FEDGUI.tabright_bottom.Commcenter )
+
+FEDGUI.exchangewindow = FEDGUI.exchangewindow or Geyser.MiniConsole:new({
+  name="FEDGUI.exchangewindow",
+  x=0, y=0,
+  autoWrap = true,
+  color = "black",
+  scrollBar = false,
+  fontSize = 14,
+  width="100%", height="100%",
+},FEDGUI.tableft.Exchangecenter )
+
+FEDGUI.cargowindow = FEDGUI.cargowindow or Geyser.MiniConsole:new({
+  name="FEDGUI.cargowindow",
+  x=0, y=0,
+  autoWrap = true,
+  color = "black",
+  scrollBar = false,
+  fontSize = 14,
+  width="100%", height="100%",
+},FEDGUI.tabright_bottom.Cargocenter )
+
+-----[ Load Saved Tab Settings ]-----
+--FEDGUI.tabwindow:load()</script>
+			<eventHandlerList />
+		</Script>
+	</ScriptPackage>
+</MudletPackage>
