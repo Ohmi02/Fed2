@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MudletPackage>
+<MudletPackage version="1.001">
+	<ScriptPackage>
+		<Script isActive="yes" isFolder="no">
+			<name>echoCargo</name>
+			<packageName></packageName>
+			<script>function echoCargo()
+  local cargo = gmcp.char.ship.cargo --this is a table, and possibly a table of tables
+  FEDGUI.cargowindow:cecho("&lt;b&gt;Current Cargo:&lt;/b&gt;\n")
+  for key, value in pairs(cargo) do
+    FEDGUI.cargowindow:cecho("&lt;b&gt;"..value.commodity) --name of the commodity
+    FEDGUI.cargowindow:cecho("&lt;/b&gt; at ")
+    FEDGUI.cargowindow:echo(value.cost) --how much you paid for it
+    FEDGUI.cargowindow:echo("/")
+    FEDGUI.cargowindow:echo(value.base)
+    if value.base-value.cost &gt;=0 then
+      FEDGUI.cargowindow:cecho(" (&lt;green&gt;+"..value.base-value.cost)
+    else
+      FEDGUI.cargowindow:cecho(" (&lt;red&gt;-"..value.base-value.cost)
+    end
+    FEDGUI.cargowindow:cecho("&lt;reset&gt;) from ")
+    FEDGUI.cargowindow:cecho("&lt;b&gt;"..value.origin) --what planet you bought it from
+    FEDGUI.cargowindow:cecho("&lt;/b&gt;\n")
+  end
+  FEDGUI.cargowindow:echo("\n")
+end
+
+--cargo table contents:
+  --base = [number] --this the commodity's default price
+  --commodity = [string] --this is the name of the commodity
+  --cost = [number] --this is how much you paid for the commodity
+  --origin = [string] --this is where the commodity came from</script>
+			<eventHandlerList>
+				<string>gmcp.char.ship</string>
+			</eventHandlerList>
+		</Script>
+	</ScriptPackage>
+</MudletPackage>
