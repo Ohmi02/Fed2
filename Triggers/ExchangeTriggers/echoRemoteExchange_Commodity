@@ -1,9 +1,0 @@
---make sure your ExchangeTriggers folder has the following start of line filter set:
---+++
---set the following perl regex in the echoRemoteExchange_Commodity trigger:
---^\+{3} The display shows the prices for (.+) \+{3}$
------[ lua code ]-----
---puts the Commodity name into the exchange window
-FEDGUI.exchangewindow:echo("+++\n")
-FEDGUI.exchangewindow:cecho('<ansiYellow>' .. matches[2] .. ':\n')
-deleteLine()
