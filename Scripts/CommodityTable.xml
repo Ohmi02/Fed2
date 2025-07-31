@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MudletPackage>
+<MudletPackage version="1.001">
+	<ScriptPackage>
+		<Script isActive="yes" isFolder="no">
+			<name>CommodityTable</name>
+			<packageName></packageName>
+			<script>--numbers taken from documentation (https://federation2.com/guide/#sec-100.60)
+--used with the ExchangeTriggers
+
+FEDUI.CommoditiesBasePrice = {
+  Cereals = 270,
+  Fruit = 420,
+  Furs = 650,
+  Hides = 400,
+  Livestock = 210,
+  Meats = 410,
+  Soya = 230,
+  Spices = 650,
+  Textiles = 300,
+  Woods = 700,
+  Alloys = 180,
+  Clays = 520,
+  Crystals = 650,
+  Gold = 600,
+  Monopoles = 720,
+  Nickel = 370,
+  Petrochemicals = 400,
+  Radioactives = 540,
+  Semiconductors = 350,
+  Xmetals = 480,
+  Explosives = 470,
+  Generators = 670,
+  LanzariK = 700,
+  LubOils = 560,
+  Mechparts = 420,
+  Munitions = 250,
+  Nitros = 230,
+  Pharmaceuticals = 630,
+  Polymers = 200,
+  Propellants = 260,
+  RNA = 380,
+  AntiMatter = 480,
+  Controllers = 710,
+  Droids = 700,
+  Electros = 250,
+  GAsChips = 450,
+  Lasers = 470,
+  NanoFabrics = 850,
+  Nanos = 550,
+  Powerpacks = 680,
+  Synths = 560,
+  Tools = 350,
+  TQuarks = 835,
+  Vidicasters = 380,
+  Weapons = 420,
+  BioChips = 650,
+  BioComponents = 760,
+  Clinics = 450,
+  Laboratories = 470,
+  MicroScalpels = 320,
+  Probes = 510,
+  Proteins = 260,
+  Sensors = 470,
+  ToxicMunchers = 470,
+  Tracers = 600,
+  Artifacts = 730,
+  Firewalls = 690,
+  Games = 210,
+  Holos = 260,
+  Hypnotapes = 430,
+  Katydidics = 610,
+  Libraries = 680,
+  Musiks = 470,
+  Sensamps = 520,
+  Simulations = 310,
+  Studios = 390,
+  Univators = 570,
+ }</script>
+			<eventHandlerList />
+		</Script>
+	</ScriptPackage>
+</MudletPackage>

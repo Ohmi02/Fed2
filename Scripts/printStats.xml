@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MudletPackage>
+<MudletPackage version="1.001">
+	<ScriptPackage>
+		<Script isActive="yes" isFolder="no">
+			<name>printStats</name>
+			<packageName></packageName>
+			<script>--takes important character and ship stats, prints them to the labels at the top of the screen
+
+if magicCashNumbers == nil then
+  magicCashNumbers = {
+    ["Commander"] = 250000,
+    ["Captain"] = 400000,
+    ["Adventurer"] = 600000,
+    ["Merchant"] = 7500000,
+    ["Trader"] = 12500000,
+    ["Industrialist"] = 17500000,
+    ["Manufacturer"] = 22500000,
+    ["Financier"] = 27500000,
+  }--magic numbers taken from the documentation (https://federation2.com/guide/#sec-220.10)
+  --groundhogs make no money and so have no need for a money cap?
+  --everyone over Financier has no cap (but may have a cap of 1,000,000,000?)
+  --planets and businesses do have a cap of 1,000,000,000 but we don't track this so it's fine
+end
+
+--Tracking: Rank, Cargo Space, Fuel, Stamina, Money, Slithies
+
+function printStats()
+  local vitals = (gmcp.char and gmcp.char.vitals) or {}
+  local ship = (gmcp.char and gmcp.char.ship) or {}
+
+  local rank    = vitals.rank or "-"
+  local holdCur = (ship.hold and ship.hold.cur) or "-"
+  local holdMax = (ship.hold and ship.hold.max) or "-"
+  local fuelCur = (ship.fuel and ship.fuel.cur) or "-"
+  local fuelMax = (ship.fuel and ship.fuel.max) or "-"
+  local stamCur = (vitals.stamina and vitals.stamina.cur) or "-"
+  local stamMax = (vitals.stamina and vitals.stamina.max) or "-"
+  local cash    = vitals.cash or "-"
+  local slith   = vitals.slithies or "-"
+  local groatsMax = magicCashNumbers[rank] or "-"
+
+  FEDUI.Label1:echo("Rank: " .. rank)
+  FEDUI.Label2:echo("Hold: " .. holdCur .. "/" .. holdMax)
+  FEDUI.Label3:echo("Fuel: " .. fuelCur .. "/" .. fuelMax)
+  FEDUI.Label4:echo("Stamina: " .. stamCur .. "/" .. stamMax)
+  if groatsMax == "-" then
+    FEDUI.Label5:echo("Groats: " .. cash)
+  else
+    FEDUI.Label5:echo("Groats: " .. cash .. "/" .. groatsMax)
+  end
+  FEDUI.Label6:echo("Slithies: " .. slith)
+end</script>
+			<eventHandlerList>
+				<string>gmcp.char</string>
+			</eventHandlerList>
+		</Script>
+	</ScriptPackage>
+</MudletPackage>

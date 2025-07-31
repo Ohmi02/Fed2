@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MudletPackage>
+<MudletPackage version="1.001">
+	<ScriptPackage>
+		<ScriptGroup isActive="yes" isFolder="yes">
+			<name>echoChatIn</name>
+			<packageName></packageName>
+			<script>--takes incoming chat and echoes it to the dedicated chat console window
+--does not currently handle XT chat</script>
+			<eventHandlerList />
+			<Script isActive="yes" isFolder="no">
+				<name>echoCom</name>
+				<packageName></packageName>
+				<script>function echoCom()
+  FEDUI.chatWindow:cecho('&lt;ansiCyan&gt;' .. gmcp.comm.com.from .. ' comms: "' .. gmcp.comm.com.message .. '"\n')
+end</script>
+				<eventHandlerList>
+					<string>gmcp.comm.com</string>
+				</eventHandlerList>
+			</Script>
+			<Script isActive="yes" isFolder="no">
+				<name>echoTell</name>
+				<packageName></packageName>
+				<script>function echoTell()
+  FEDUI.chatWindow:cecho('&lt;ansiRed&gt;' .. gmcp.comm.tell.from .. ' tight beams you: "' .. gmcp.comm.tell.message .. '"\n')
+end</script>
+				<eventHandlerList>
+					<string>gmcp.comm.tell</string>
+				</eventHandlerList>
+			</Script>
+			<Script isActive="yes" isFolder="no">
+				<name>echoSay</name>
+				<packageName></packageName>
+				<script>function echoSay()
+  FEDUI.chatWindow:cecho('&lt;ansiCyan&gt;' .. gmcp.comm.say.from .. ' says: "' .. gmcp.comm.say.message .. '"\n')
+end</script>
+				<eventHandlerList>
+					<string>gmcp.comm.say</string>
+				</eventHandlerList>
+			</Script>
+		</ScriptGroup>
+	</ScriptPackage>
+</MudletPackage>
