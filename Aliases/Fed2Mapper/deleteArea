@@ -1,6 +1,0 @@
---set pattern to:
---^fedmap delete area
-
-local areaID = getRoomArea(getPlayerRoom())
-deleteArea(areaID)
-echo("local area deleted\n")

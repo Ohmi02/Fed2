@@ -1,6 +1,0 @@
---set alias trigger pattern to:
---^fedmap clear symbol
-
-local roomID = getRoomIDbyHash(gmcp.room.info.system ..".".. gmcp.room.info.area.."."..gmcp.room.info.num)
-setRoomChar(roomID, "")
-echo("symbol cleared\n")
