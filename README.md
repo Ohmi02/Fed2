@@ -1,4 +1,6 @@
 # Fed2
+These are Mudlet packages designed for the Federation 2 Community Edition text-based game. See https://federation2.com/ for more information.
+
 Two packages are available: the standalone fed2mapper package that has no UI elements, or the fed2ui package that contains a lightweight UI and includes the mapper. Plese remove the Generic Mapper package before using either of these packages.
 
 ## fed2mapper
