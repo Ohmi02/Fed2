@@ -1,7 +1,0 @@
---for this to function, create a new script named echoCom
---add the user event 'gmcp.comm.say'
---this script will fire when mudlet receives a gmcp.comm.say event
-function echoSay()
-  FEDGUI.chatwindow:echo("\n")
-  FEDGUI.chatwindow:cecho('<ansiCyan>' .. gmcp.comm.say.from .. ' says: "' .. gmcp.comm.say.message .. '"')
-end
