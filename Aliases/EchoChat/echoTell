@@ -1,5 +1,0 @@
---pattern:
---^tell (\w+) (.+)$
-send(matches[1])
-FEDGUI.chatwindow:echo("\n")
-FEDGUI.chatwindow:cecho('<ansiRed>You tell ' .. matches[2] .. ': "' .. matches[3] .. '"')
