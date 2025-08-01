@@ -8,6 +8,7 @@
 			<script>--echoes cargo information to the cargo console
 function echoCargo()
   local cargo = gmcp.char.ship.cargo --this is a table, and possibly a table of tables
+  clearWindow("FEDUI.cargoWindow") --reset the window, no need to have old cargo sticking around
   FEDUI.cargoWindow:cecho("&lt;b&gt;Current Cargo:&lt;/b&gt;\n")
   for key, value in pairs(cargo) do
     FEDUI.cargoWindow:cecho("&lt;b&gt;"..value.commodity) --name of the commodity
@@ -16,9 +17,9 @@ function echoCargo()
     FEDUI.cargoWindow:echo("/")
     FEDUI.cargoWindow:echo(value.base) --default price of commodity
     if value.base-value.cost &gt;=0 then
-      FEDUI.cargoWindow:cecho(" (&lt;green&gt;+"..value.base-value.cost)
+      FEDUI.cargoWindow:cecho(" (&lt;green&gt;+"..value.base-value.cost) --the amount under base price you paid
     else
-      FEDUI.cargoWindow:cecho(" (&lt;red&gt;-"..value.base-value.cost)
+      FEDUI.cargoWindow:cecho(" (&lt;red&gt;-"..value.base-value.cost) --the amount over base price you paid
     end
     FEDUI.cargoWindow:cecho("&lt;reset&gt;) from ")
     FEDUI.cargoWindow:cecho("&lt;b&gt;"..value.origin) --what planet you bought it from
