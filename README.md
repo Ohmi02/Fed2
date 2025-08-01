@@ -20,7 +20,8 @@ Two packages are available: the standalone fed2mapper package that has no UI ele
 - *fed2ui v1.2*:
   + UI will automatically build itself on install
  ## To Do
- - Better logic for catching exchange spam
+ - Fuel and Stamina should turn alarming colors when low
+ - Better triggers/logic for catching exchange spam
  - Aliases so the UI will respect when the in-game default colors for chat and exchange messages are changed
  - Add logic to catch XT chat 
 
