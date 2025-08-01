@@ -51,16 +51,19 @@ function FEDUI.buildFramework()
     attached = "top" 
   })
   
------[ connect the containers so they're actually adjustable ]-----
+-----[ add connect menu to the frames, so users can connect/disconnect them ]-----
+  Adjustable.Container:doAll(function(self) self:addConnectMenu() end)
+  
+-----[ connect the containers ourselves ]-----
   FEDUI.leftFrame:connectToBorder("left")
   FEDUI.rightFrame:connectToBorder("right")
   FEDUI.topFrame:connectToBorder("left")
   FEDUI.topFrame:connectToBorder("right")
 
 -----[ lock the containers in place ]-----
-  FEDUI.leftFrame:lockContainer("full")
-  FEDUI.rightFrame:lockContainer("full")
-  FEDUI.topFrame:lockContainer("full")
+  FEDUI.leftFrame:lockContainer("border")
+  FEDUI.rightFrame:lockContainer("border")
+  FEDUI.topFrame:lockContainer("border")
 
 end
 
@@ -95,22 +98,22 @@ function FEDUI.buildHeader()
     padding: 4px;
   ]]
     
-  FEDUI.Label1:setStyleSheet(LabelCSS)
+  --FEDUI.Label1:setStyleSheet(LabelCSS)
   FEDUI.Label1:setFontSize(12)
   
-  FEDUI.Label2:setStyleSheet(LabelCSS)
+  --FEDUI.Label2:setStyleSheet(LabelCSS)
   FEDUI.Label2:setFontSize(12)
   
-  FEDUI.Label3:setStyleSheet(LabelCSS)
+  --FEDUI.Label3:setStyleSheet(LabelCSS)
   FEDUI.Label3:setFontSize(12)
   
-  FEDUI.Label4:setStyleSheet(LabelCSS)
+  --FEDUI.Label4:setStyleSheet(LabelCSS)
   FEDUI.Label4:setFontSize(12)
   
-  FEDUI.Label5:setStyleSheet(LabelCSS)
+  --FEDUI.Label5:setStyleSheet(LabelCSS)
   FEDUI.Label5:setFontSize(12)
   
-  FEDUI.Label6:setStyleSheet(LabelCSS)
+  --FEDUI.Label6:setStyleSheet(LabelCSS)
   FEDUI.Label6:setFontSize(12)
 
 end
@@ -251,9 +254,9 @@ function FEDUI.popUI()
   --put exchange console in exchange tab
   FEDUI.exchangeWindow = Geyser.MiniConsole:new({
     name = "FEDUI.exchangeWindow",
-    x = "0.5%", y = "0.5%",
-    width = "99%",
-    height = "99%",
+    x = "0%", y = "0%",
+    width = "100%",
+    height = "100%",
     autoWrap = true,
     scrollBar = false,
     fontSize = textSize,
@@ -264,9 +267,9 @@ function FEDUI.popUI()
   --put chat console in chat tab
   FEDUI.chatWindow = Geyser.MiniConsole:new({
     name = "FEDUI.chatWindow",
-    x = "0.5%", y = "0.5%",
-    width = "99%",
-    height = "99%",
+    x = "0%", y = "0%",
+    width = "100%",
+    height = "100%",
     autoWrap = true,
     scrollBar = false,
     fontSize = textSize,
@@ -277,9 +280,9 @@ function FEDUI.popUI()
   --put cargo console in cargo tab
   FEDUI.cargoWindow = Geyser.MiniConsole:new({
     name = "FEDUI.cargoWindow",
-    x = "0.5%", y = "0.5%",
-    width = "99%",
-    height = "99%",
+    x = "0%", y = "0%",
+    width = "100%",
+    height = "100%",
     autoWrap = true,
     scrollBar = false,
     fontSize = textSize,
@@ -289,25 +292,45 @@ function FEDUI.popUI()
   
 end
 
---===[ build the UI at connection ]===--
---probably superfluious since the package gets automatically installed
---and that prevents this from triggering
+--===[ actually build/unbuild the UI ]===--
+fed2ui_toggle = fed2ui_toggle or "on" --do we want to build the UI?
+
+--call all the functions to build the UI
 function FEDUI.buildUI()
+  FEDUI.oldBorderLeft = getBorderLeft()
+  FEDUI.oldBorderTop = getBorderTop()
+  FEDUI.oldBorderRight = getBorderRight()
   FEDUI.buildFramework()
   FEDUI.buildHeader()
   FEDUI.buildTabs()
   FEDUI.popUI()
 end
 
+--for when you really don't want the UI around
+function FEDUI.unbuildUI()
+  resetProfile()
+  FEDUI.setBorderLeft(FEDUI.oldBorderLeft)
+  FEDUI.setBorderTop(FEDUI.oldBorderTop)
+  FEDUI.setBorderRight(FEDUI.oldBorderRight)
+end
+
 --should run on install, check that this package is what has been installed,
---check that we're on a Fed2 server, then build the UI
-function FEDUI.onInstall(event, package, path)
-  local host, port, connected = getConnectionInfo()
-  --echo(host .. " " .. package)
+--check that the user actually wants to run the package,
+--if it's all good, build the UI
+function FEDUI.onInstall(event,package,path)
+  --local host, port, connected = getConnectionInfo()
   if package == "fed2ui" then
-    if host == "play.federation2.com" or "test.federation2.com" then
+    cecho("Federation 2 Community Edition UI is installed - \n")
+    if fed2ui_toggle == "on" then
+      if table.contains(getPackages(),"generic_mapper") then
+        uninstallPackage("generic_mapper")
+      end
       FEDUI.buildUI()
+      cecho("UI is enabled!\n")
+    elseif fed2ui_toggle == "off" then
+      echo("UI is disabled!\n")
     end
+    cecho("Type &lt;b&gt;'fedui on/off'&lt;/b&gt; to enable/disable the UI!\n")
   end
 end
 
