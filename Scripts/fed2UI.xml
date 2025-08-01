@@ -290,6 +290,8 @@ function FEDUI.popUI()
 end
 
 --===[ build the UI at connection ]===--
+--probably superfluious since the package gets automatically installed
+--and that prevents this from triggering
 function FEDUI.buildUI()
   FEDUI.buildFramework()
   FEDUI.buildHeader()
@@ -297,7 +299,20 @@ function FEDUI.buildUI()
   FEDUI.popUI()
 end
 
-registerAnonymousEventHandler("sysConnectionEvent", "FEDUI.buildUI()")</script>
+--should run on install, check that this package is what has been installed,
+--check that we're on a Fed2 server, then build the UI
+function FEDUI.onInstall(event, package, path)
+  local host, port, connected = getConnectionInfo()
+  --echo(host .. " " .. package)
+  if package == "fed2ui" then
+    if host == "play.federation2.com" or "test.federation2.com" then
+      FEDUI.buildUI()
+    end
+  end
+end
+
+registerAnonymousEventHandler("sysConnectionEvent", "FEDUI.buildUI()")
+registerAnonymousEventHandler("sysInstallPackage", FEDUI.onInstall)</script>
 			<eventHandlerList />
 		</Script>
 	</ScriptPackage>
