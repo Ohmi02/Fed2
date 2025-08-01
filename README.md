@@ -15,7 +15,7 @@ Two packages are available: the standalone fed2mapper package that has no UI ele
 - *fed2ui v1.3*:
   + Fixed adjustable windows not actually being adjustable
   + Cargo window will now clear itself before displaying cargo
-  + Added a toggle so you can tell the UI not to automatically build istelf on install
+  + Added a toggle so you can tell the UI not to automatically build itself on install
   + Added auto uninstall of Generic Mapper
 - *fed2ui v1.2*:
   + UI will automatically build itself on install
