@@ -12,6 +12,11 @@ Two packages are available: the standalone fed2mapper package that has no UI ele
 - Select 'Install new package' in the window that appears, navigate to where you placed your mpackage, and select it.
 
 ## Change Log
+- *fed2ui v1.4*:
+  + since the package is no longer autoinstalled on launching Fed2, removed the install toggle
+  + Formatted money display to be more readable
+  + Added alarming colors when your cargo space, fuel, or stamina get low
+  + Added 'Commodities' tab that displays every commodity in-game, sorted by base price
 - *fed2ui v1.3*:
   + Fixed adjustable windows not actually being adjustable
   + Cargo window will now clear itself before displaying cargo
@@ -20,7 +25,6 @@ Two packages are available: the standalone fed2mapper package that has no UI ele
 - *fed2ui v1.2*:
   + UI will automatically build itself on install
  ## To Do
- - Fuel and Stamina should turn alarming colors when low
  - Better triggers/logic for catching exchange spam
  - Aliases so the UI will respect when the in-game default colors for chat and exchange messages are changed
  - Add logic to catch XT chat 
