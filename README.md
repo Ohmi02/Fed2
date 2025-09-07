@@ -16,7 +16,7 @@ Two packages are available: the standalone fed2mapper package that has no UI ele
 # fed2ui
 basic UI and mapper for Federation 2 Community Edition
 
-This is a basic interface that breaks out useful information into separate windows. Exchange spam goes on the left, useful stats on top, a mapper on the top right, and a copy of chat on the bottom right.
+This is a basic interface that breaks out useful information into separate windows. Exchange and login/logoff spam goes on the left, useful stats on top, a mapper on the top right, and a copy of chat on the bottom right.
 
 Currently colors and font sizes are hardcoded. Customization is planned in a future update.
 
