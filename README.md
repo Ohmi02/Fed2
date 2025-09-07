@@ -4,14 +4,29 @@ These are [Mudlet](https://wiki.mudlet.org/w/Main_Page) packages designed for th
 Two packages are available: the standalone fed2mapper package that has no UI elements, or the fed2ui package that contains a lightweight UI and includes the mapper. Plese remove the Generic Mapper package before installing the fed2mapper. The fed2ui package will uninstall Generic Mapper on its own.
 
 ## fed2ui screenshot
-![Screenshot of the v1.2 fed2ui interface](https://raw.githubusercontent.com/Ohmi02/Fed2/refs/heads/main/fed2ui_screenshot.PNG)
+![Screenshot of the v1.5 fed2ui interface](https://raw.githubusercontent.com/Ohmi02/Fed2/refs/heads/main/fed2ui_screenshot_v2.PNG)
 
 ## Install Instructions
 - Download either fed2ui.mpackage or fed2mapper.mpackage and place it in the directory of your choice.
-- Open Mudlet, click on the 'Packages' button in the menu bar.
+- Open Mudlet, click on the 'Packages' button in the menu bar to reach the Package Manager.
 - Select 'Install new package' in the window that appears, navigate to where you placed your mpackage, and select it.
+  + if installing the fed2mapper, also select the Generic Mapper and remove it.
+- You may need to restart Mudlet before everything works.
+
+# fed2ui
+basic UI and mapper for Federation 2 Community Edition
+
+This is a basic interface that breaks out useful information into separate windows. Exchange spam goes on the left, useful stats on top, a mapper on the top right, and a copy of chat on the bottom right.
+
+Currently colors and font sizes are hardcoded. Customization is planned in a future update.
+
+This primarily uses GMCP events to collect information, with some aliases designed to catch outgoing chat and copy it into the chat window. Exchange and login/logoff spam is caught entirely through triggers. The mapper uses GMCP events and is always on, but has some aliases allowing basic map editing. Once installed type 'fedmap help' for the list of mapper aliases.
 
 ## Change Log
+- *fed2ui v1.5*:
+  + changed 'Exchange' tab to 'Overflow' tab
+  + login/logoff spam (in addition to exchange spam) is sent to the Overflow tab
+  + adjusted integrated mapper to v1.2 - see fed2mapper changelog for details
 - *fed2ui v1.4*:
   + since the package is no longer autoinstalled on launching Fed2, removed the install toggle
   + Formatted money display to be more readable
@@ -28,15 +43,6 @@ Two packages are available: the standalone fed2mapper package that has no UI ele
  - Better triggers/logic for catching exchange spam
  - Aliases so the UI will respect when the in-game default colors for chat and exchange messages are changed
  - Add logic to catch XT chat 
-
-# fed2ui
-basic UI and mapper for Federation 2 Community Edition
-
-This is a basic interface that breaks out useful information into separate windows. Exchange spam goes on the left, useful stats on top, a mapper on the top right, and a copy of chat on the bottom right.
-
-Currently colors and font sizes are hardcoded. Customization is planned in a future update.
-
-This primarily uses GMCP events to collect information, with some aliases designed to catch outgoing chat and copy it into the chat window. Exchange spam is caught entirely through triggers. T_T The mapper uses GMCP events and is always on, but has some aliases allowing basic map editing. See 'fedmap help' for more information.
 
 # fed2mapper
 standalone mapper for Federation 2 Community Edition
@@ -67,6 +73,12 @@ Also included are some aliases allowing light map editing from the command line,
 - **fedmap move {x-coordinate} {y-coordinate}** - moves the room to the specified coordinates
 - **fedmap reset room** - resets the room to its default name, color, symbols, and coordinates
 - **fedmap reset exits** - resets the room's exits to whatever the game is showing right now
+- **fedmap reset zoom** - resets the area zoom to default
 - **fedmap delete area** - wipes the current map, for when you want to start over completely
 - **fedmap grid {on/off}** - toggles mapper's grid mode, smushing rooms together and hiding the exit lines
 - **fedmap help** - lists all the aliases
+## Change Log
+- *fed2mapper v1.2*:
+  + adjusted the default zoom to be closer
+  + added an alias to reset zoom to the default
+  + changed the default color for jump points to blue
