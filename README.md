@@ -23,6 +23,11 @@ Currently colors and font sizes are hardcoded. Customization is planned in a fut
 This primarily uses GMCP events to collect information, with some aliases designed to catch outgoing chat and copy it into the chat window. Exchange and login/logoff spam is caught entirely through triggers. The mapper uses GMCP events and is always on, but has some aliases allowing basic map editing. Once installed type 'fedmap help' for the list of mapper aliases.
 
 ## Change Log
+- *fed2ui v1.6*:
+  + in light of my ongoing quest to not need to look at external pages while playing,
+    the 'work' command now copies a condensed summary of Armstrong Cuthbert jobs to the Cargo tab.
+    This condensed output shows actual travel times between planets and total pay, making it easier
+    to identify high-paying jobs and avoid jobs with a penalty.
 - *fed2ui v1.5*:
   + changed 'Exchange' tab to 'Overflow' tab
   + login/logoff spam (in addition to exchange spam) is sent to the Overflow tab
