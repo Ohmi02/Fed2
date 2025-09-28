@@ -23,6 +23,9 @@ Currently colors and font sizes are hardcoded. Customization is planned in a fut
 This primarily uses GMCP events to collect information, with some aliases designed to catch outgoing chat and copy it into the chat window. Exchange and login/logoff spam is caught entirely through triggers. The mapper uses GMCP events and is always on, but has some aliases allowing basic map editing. Once installed type 'fedmap help' for the list of mapper aliases.
 
 ## Change Log
+- *fed2ui v1.6.1*:
+  + fixed up the 'work' output to no longer show unprofitable jobs, adjusted the formatting to be cleaner
+  + fixed the status display to work with the 'Adventuress' rank, and not just the 'Adventurer' rank
 - *fed2ui v1.6*:
   + in light of my ongoing quest to not need to look at external pages while playing,
     the 'work' command now copies a condensed summary of Armstrong Cuthbert jobs to the Cargo tab.
