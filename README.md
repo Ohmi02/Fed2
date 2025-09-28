@@ -25,6 +25,7 @@ This primarily uses GMCP events to collect information, with some aliases design
 ## Change Log
 - *fed2ui v1.6.1*:
   + fixed up the 'work' output to no longer show unprofitable jobs, adjusted the formatting to be cleaner
+  + fixed some travel times in the SolDistances list
   + fixed the status display to work with the 'Adventuress' rank, and not just the 'Adventurer' rank
 - *fed2ui v1.6*:
   + in light of my ongoing quest to not need to look at external pages while playing,
